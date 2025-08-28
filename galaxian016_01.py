@@ -564,6 +564,7 @@ class Galaxian:
 		self.demoMode = True
 		self.scene = 0
 		
+		
 		# pyxelの実行
 		# (フレーム更新時、描画時に呼ぶ関数の登録)
 		pyxel.run(self.update, self.draw)
