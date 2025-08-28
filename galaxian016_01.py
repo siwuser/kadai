@@ -42,6 +42,8 @@ class Beam:
 	def __init__(self):
 		self.x = 0
 		self.y = 0
+		# ### 変更点１：弾速を設定 ###
+		self.speed = 3
 		self.init()
 		
 	def init(self):
@@ -58,9 +60,10 @@ class Beam:
 	def move(self):
 		if not self.underShot():
 			return
-			
-		self.y -= 1
-		if self.y == 0:
+		
+		# ### 変更点２：設定した弾速で移動させる ###
+		self.y -= self.speed
+		if self.y <= 0:
 			self.shot = False
 			
 	def underShot(self):
@@ -335,23 +338,31 @@ class Alian:
 	def point(self, type):
 		return [30, 30, 40, 40, 50, 50, 60, 60, 80, 100, 150][type-1]
 
-	def hitByBeam(self, pos):
-		beam_x, beam_y = pos
-		for i in range(self.num_of_alians):
-			if self.alians[i]["alive"]:
-				if (self.alians[i]["x"] <= beam_x  <= self.alians[i]["x"]+4) and \
-				   self.alians[i]["y"] == beam_y:
-					self.alians[i]["alive"] = False
+	# ### 変更点４：当たり判定のロジックを修正 ###
+	def hitByBeam(self, beam):
+		beam_x, beam_y_current = beam.pos()
+
+		# 弾が1フレームで移動した軌跡（Y座標）をすべてチェックする
+		for y_check in range(beam_y_current + beam.speed - 1, beam_y_current - 1, -1):
+			# 編隊のエイリアンとの当たり判定
+			for i in range(self.num_of_alians):
+				if self.alians[i]["alive"]:
+					if (self.alians[i]["x"] <= beam_x <= self.alians[i]["x"] + 4) and \
+					   self.alians[i]["y"] == y_check:
+						self.alians[i]["alive"] = False
+						self.count -= 1
+						beam.y = y_check  # 爆発表示のため、弾の位置を衝突座標に更新
+						return self.point(self.alians[i]["type"])
+
+			# 攻撃中のエイリアンとの当たり判定（リストから削除するため逆順でループ）
+			for i in range(len(self.attacks) - 1, -1, -1):
+				if (self.attacks[i]["x"] <= beam_x <= self.attacks[i]["x"] + 4) and \
+				   self.attacks[i]["y"] == y_check:
+					point = self.point(self.attacks[i]["type"])
+					beam.y = y_check  # 爆発表示のため、弾の位置を衝突座標に更新
+					self.attacks.pop(i)
 					self.count -= 1
-					return self.point(self.alians[i]["type"])
-		for i in range(len(self.attacks)-1, -1, -1):
-			if (self.attacks[i]["x"] <= beam_x <= self.attacks[i]["x"]+4) and \
-			   self.attacks[i]["y"] == beam_y:
-				point = self.point(self.attacks[i]["type"])
-				self.attacks.pop(i)
-				self.count -= 1
-				return point
-				
+					return point
 		return 0
 		
 	def hitShip(self, pos):
@@ -615,7 +626,8 @@ class Galaxian:
 		
 		# 衝突判定
 		if self.beam.underShot():
-			pt = self.alian.hitByBeam(self.beam.pos())
+			# ### 変更点３：当たり判定メソッドにbeamオブジェクト自体を渡す ###
+			pt = self.alian.hitByBeam(self.beam)
 			if pt > 0:
 				self.explosion.start(self.beam.pos())
 				self.point.start(pt, self.beam.pos())
