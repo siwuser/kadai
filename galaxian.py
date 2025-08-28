@@ -588,11 +588,15 @@ class Galaxian:
 		
 	def demoPlay(self):
 		if self.ship.left() == 0:
-			pyxel.text(BEGIN_X+58, 80, "GAME OVER", 8)
-		pyxel.text(BEGIN_X+50, 100, "Pyxel GALAXIAN", 7)
+			# ### 変更点：日本語化 ###
+			pyxel.text(BEGIN_X+52, 80, "ゲームオーバー", 8)
+		# ### 変更点：日本語化 ###
+		pyxel.text(BEGIN_X+42, 100, "Pyxel ギャラクシアン", 7)
 		# スタートの案内文言を変更
-		pyxel.text(BEGIN_X+45, 116, "START : MOUSE CLICK", 7)
-		pyxel.text(BEGIN_X+50, 132, "HIGH SCORE {}".format(
+		# ### 変更点：日本語化、位置調整 ###
+		pyxel.text(BEGIN_X+52, 116, "クリックでスタート", 7)
+		# ### 変更点：日本語化、位置調整 ###
+		pyxel.text(BEGIN_X+52, 132, "ハイスコア {}".format(
 			self.score.hi_value()), 7)
 		# スペースキーからマウスクリックでのスタートに変更
 		if pyxel.btnp(pyxel.MOUSE_BUTTON_LEFT):
@@ -666,8 +670,9 @@ class Galaxian:
 		
 		# 各キャラクタの描画処理
 		self.star.draw()
-		pyxel.text(BEGIN_X, 0,
-			" SCENE:{0:2d}   HI:{1:05d} SCORE:{2:05d} LEFT:{3:1d}".format(
+		# ### 変更点：日本語化 ###
+		pyxel.text(BEGIN_X+4, 0,
+			"ステージ:{0:2d} ハイスコア:{1:05d} スコア:{2:05d} 残り:{3:1d}".format(
 				self.scene,
 				self.score.hi_value(),
 				self.score.value(),
